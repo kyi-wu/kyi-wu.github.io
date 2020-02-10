@@ -45,7 +45,7 @@
   <h2>Town of Huntsville: Livability Index for Residents and Tourists</h2>
   </div>
   
-  <img src="\Legend.PNG" alt="Legend" style="width:190px;height:300px; 
+  <img src="\Legend.PNG" alt="Legend" style="width:190px;height:267px; 
        position:absolute;
        right:10px;
        bottom:225px;
@@ -213,7 +213,7 @@
     'Livability Index for Residents':Residents,
     'Livability Index for Tourists': Tourists};
 
-  L.control.layers(OSMLayer, GeneralLayer).addTo(map);
+  L.control.layers(OSMLayer, GeneralLayer,{collapsed: false }).addTo(map);
 
 //Add Search=============================================================================================
   var arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
