@@ -21,13 +21,14 @@
   <script src="https://unpkg.com/esri-leaflet-geocoder@2.3.2/dist/esri-leaflet-geocoder.js"
     integrity="sha512-8twnXcrOGP3WfMvjB0jS5pNigFuIWj4ALwWEgxhZ+mxvjF5/FBPVd5uAxqT8dd2kUmTVK9+yQJ4CmTmSg/sXAQ=="
     crossorigin=""></script>
+  
 
   <style>
 
   img {}
 
   body { margin:0; padding:0; }
-  #map { position: absolute; top:40; bottom:0; right:0; left:0; z-index:1;}
+  #map { position: absolute; top:40px; bottom:0; right:0; left:0; z-index:1;}
   
   .header {
   padding: 1px;
@@ -36,15 +37,14 @@
   color: white;
   font-size: 10px;
   }
-  
   </style>
 </head>
 <body>
-  
+
   <div class="header">
   <h2>Town of Huntsville: Livability Index for Residents and Tourists</h2>
   </div>
-  
+
   <img src="\Legend.PNG" alt="Legend" style="width:190px;height:267px; 
        position:absolute;
        right:10px;
@@ -111,6 +111,7 @@
 
   var TouristAttraction = L.esri.featureLayer({
     url: 'https://services1.arcgis.com/DwLTn0u9VBSZvUPe/arcgis/rest/services/Tourist_Attraction/FeatureServer/0',
+    pane:'TA Pane',
     pointToLayer: function (geojson, latlng) {
       return L.marker(latlng, {
         icon: TA_icon
@@ -201,21 +202,25 @@
   map.createPane('Tourist Pane');
   map.createPane('Res Pane');
   map.createPane('Floozone Pane');
+  map.createPane('TA Pane')
 
   //Add Layer Control=====================================================================================
   var OSMLayer = {
     OpenStreetMap:OSM
   };
 
+  var GeneralFeatures = L.layerGroup([FloodZone,TouristAttraction]);
+
   var GeneralLayer = {
-    'Flood Zone': FloodZone,
-    'Tourist Attraction Points':TouristAttraction,
+    'Flood Zones':FloodZone,
+    'Tourist Attraction Point': TouristAttraction,
     'Livability Index for Residents':Residents,
-    'Livability Index for Tourists': Tourists};
+    'Livability Index for Tourists':Tourists};
 
-  L.control.layers(OSMLayer, GeneralLayer,{collapsed: false }).addTo(map);
+  L.control.layers(OSMLayer, GeneralLayer, {collapsed: false }).addTo(map);
 
-//Add Search=============================================================================================
+
+  //Add Search=============================================================================================
   var arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
 
   L.esri.Geocoding.geosearch({
