@@ -21,26 +21,31 @@
   <script src="https://unpkg.com/esri-leaflet-geocoder@2.3.2/dist/esri-leaflet-geocoder.js"
     integrity="sha512-8twnXcrOGP3WfMvjB0jS5pNigFuIWj4ALwWEgxhZ+mxvjF5/FBPVd5uAxqT8dd2kUmTVK9+yQJ4CmTmSg/sXAQ=="
     crossorigin=""></script>
-  
-
-
 
   <style>
-  img {position:absolute;
-       right:0px;
-       bottom:17px;
-       z-index:2;
-  }
-    body { margin:0; padding:0; }
-    #map { position: absolute; top:0; bottom:0; right:0; left:0; z-index:1;}
+
+  img {}
+
+  body { margin:0; padding:0; }
+  #map { position: absolute; top:0; bottom:0; right:0; left:0; z-index:1;}
   
   </style>
 </head>
 <body>
 
+  <img src="Legend.png" alt="Legend" style="width:190px;height:300px; 
+       position:absolute;
+       right:1px;
+       bottom:230px;
+       z-index:2;">
 
-<img src="\Legend.PNG" alt="Legend" style="width:190px;height:300px;">
-<div id="map"></div>
+  <img src="inset.png" style ="width:230px;height:200px;
+       position:absolute;
+       right:1px;
+       bottom:19px;
+       z-index:2;">
+
+  <div id="map"></div>
 
 <script>
 
