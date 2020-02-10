@@ -27,22 +27,36 @@
   img {}
 
   body { margin:0; padding:0; }
-  #map { position: absolute; top:0; bottom:0; right:0; left:0; z-index:1;}
+  #map { position: absolute; top:40; bottom:0; right:0; left:0; z-index:1;}
+  
+  .header {
+  padding: 1px;
+  text-align: center;
+  background: #000000;
+  color: white;
+  font-size: 10px;
+  }
   
   </style>
 </head>
 <body>
-
+  
+  <div class="header">
+  <h2>Town of Huntsville: Livability Index for Residents and Tourists</h2>
+  </div>
+  
   <img src="\Legend.PNG" alt="Legend" style="width:190px;height:300px; 
        position:absolute;
-       right:1px;
-       bottom:230px;
+       right:10px;
+       bottom:225px;
+       box-shadow: 3px 3px 5px grey;
        z-index:2;">
 
   <img src="\inset.PNG" style ="width:230px;height:200px;
        position:absolute;
-       right:1px;
+       right:10px;
        bottom:19px;
+       box-shadow: 3px 3px 5px grey;
        z-index:2;">
 
   <div id="map"></div>
