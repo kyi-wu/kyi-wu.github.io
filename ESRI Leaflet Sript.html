@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Livability Indices of Huntsville</title>  
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+
+  <!-- Load Leaflet from CDN-->
+  <link rel="stylesheet" href="C:\Users\admin\Documents\Ann's School Works\GEM 4A Documents\Geog 487\A1\leaflet\leaflet.css" />
+  <script src="C:\Users\admin\Documents\Ann's School Works\GEM 4A Documents\Geog 487\A1\leaflet\leaflet.js"></script>
+
+  <!-- Load Esri Leaflet from CDN -->
+  <script src="https://unpkg.com/esri-leaflet@2.3.3/dist/esri-leaflet.js"
+    integrity="sha512-cMQ5e58BDuu1pr9BQ/eGRn6HaR6Olh0ofcHFWe5XesdCITVuSBiBZZbhCijBe5ya238f/zMMRYIMIIg1jxv4sQ=="
+    crossorigin=""></script>
+
+  <!-- Load Esri Leaflet Geocoder from CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder@2.3.2/dist/esri-leaflet-geocoder.css"
+    integrity="sha512-IM3Hs+feyi40yZhDH6kV8vQMg4Fh20s9OzInIIAc4nx7aMYMfo+IenRUekoYsHZqGkREUgx0VvlEsgm7nCDW9g=="
+    crossorigin="">
+  <script src="https://unpkg.com/esri-leaflet-geocoder@2.3.2/dist/esri-leaflet-geocoder.js"
+    integrity="sha512-8twnXcrOGP3WfMvjB0jS5pNigFuIWj4ALwWEgxhZ+mxvjF5/FBPVd5uAxqT8dd2kUmTVK9+yQJ4CmTmSg/sXAQ=="
+    crossorigin=""></script>
+  
+
+  <style>
+
+  img {}
+
+  body { margin:0; padding:0; }
+  #map { position: absolute; top:40px; bottom:0; right:0; left:0; z-index:1;}
+  
+  .header {
+  padding: 1px;
+  text-align: center;
+  background: #000000;
+  color: white;
+  font-size: 10px;
+  }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+  <h2>Town of Huntsville: Livability Index for Residents and Tourists</h2>
+  </div>
+
+  <img src="Legend.png" alt="Legend" style="width:190px;height:290px; 
+       position:absolute;
+       right:10px;
+       top:180px;
+       box-shadow: 3px 3px 5px grey;
+       z-index:2;">
+
+  <div id="map"></div>
+
+<script>
+
+  // load OSM basemap=======================================================================================
+  var OSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    opacity: 0.7,
+    maxZoom: 17,
+    minZoom: 9
+  });
+
+
+  //Add Customized Icons to General Features=================================================================
+  //TA_icon
+  var TA_icon = L.icon({
+    iconUrl: 'https://image.flaticon.com/icons/png/512/3/3901.png',
+    iconSize: [20, 20],
+    iconAnchor: [13.5, 17.5],
+    popupAnchor: [0, -11]
+  });
+
+  //Add General Features=======================================================================================
+  //Floodzone
+  //https://services1.arcgis.com/DwLTn0u9VBSZvUPe/arcgis/rest/services/Floodzone/FeatureServer
+  var FloodZone =L.esri.featureLayer({
+    url: 'https://services1.arcgis.com/DwLTn0u9VBSZvUPe/arcgis/rest/services/Floodzone/FeatureServer/0',
+    pane:'Floozone Pane',
+    simplifyFactor: 0,
+    precision: 10,
+    opacity: 0.7,
+    style: function (feature) {
+      if (feature.properties.ZONE_NAME === 'Natural Resource') {
+        return { fillColor: '#002a66', weight: 1, color:'#002a66'};
+      } else if (feature.properties.ZONE_NAME === 'Natural Resource Floodfringe') {
+        return { fillColor: '#3386ff', weight: 1, color:'#3386ff'};
+      } else {
+        return { fillColor: '#0053cc', weight: 1, color:'#0053cc'};
+      }
+    }
+  });
+
+  FloodZone.bindPopup(function (layer) {
+    return L.Util.template('<p><strong>Zone Type: </strong>{ZONE_NAME}</p>', layer.feature.properties);
+  });
+
+
+  //Toursit Attraction-----------------------------------------------------------------------
+
+  var TouristAttraction = L.esri.featureLayer({
+    url: 'https://services1.arcgis.com/DwLTn0u9VBSZvUPe/arcgis/rest/services/Tourist_Attraction/FeatureServer/0',
+    pane:'TA Pane',
+    pointToLayer: function (geojson, latlng) {
+      return L.marker(latlng, {
+        icon: TA_icon
+      });
+    }
+  });
+
+  TouristAttraction.bindPopup(function (layer) {
+    return L.Util.template('<p><strong>Tourist Attraction Point</strong><br><strong>Name: </strong>{NAME} <br><strong>Address: </strong>{ADDRESS}.</p>', layer.feature.properties);
+  });
+
+
+  //Add Suitability Layers================================================================================
+  //Residents---------------------------------------------------------------------------------
+  var Residents =L.esri.featureLayer({
+    url: 'https://services1.arcgis.com/DwLTn0u9VBSZvUPe/arcgis/rest/services/Resident/FeatureServer/0',
+    pane:'Res Pane',
+    simplifyFactor: 0,
+    precision: 10,
+    opacity: 0.6,
+    style: function (feature) {
+      if (feature.properties.Type === 'Most Suitable') {
+        return { fillColor: '#641E16', weight: 1,color: '#641E16'};
+      } else if (feature.properties.Type === 'Suitable') {
+        return { fillColor: '#CB4335', weight: 1,color: '#CB4335'};
+      } else if (feature.properties.Type === 'Somewhat Suitable') {
+        return { fillColor: '#E67E22', weight: 1,color: '#E67E22' };
+      } else if (feature.properties.Type === 'Less Suitable') {
+        return { fillColor: '#F5B041', weight: 1,color: '#F5B041' };
+      } else {
+        return { fillColor: '#F9E79F', weight: 1,color: '#F9E79F'};
+      }
+    }
+  });
+
+
+  Residents.bindPopup(function (layer) {
+    return L.Util.template('<p><strong>Livability Index for Residents</strong><br><strong>Suitability: </strong>{Type}</p>', layer.feature.properties);
+  });
+
+
+  //Tourist-----------------------------------------------------------------------------------
+  var Tourists =L.esri.featureLayer({
+    url: 'https://services1.arcgis.com/DwLTn0u9VBSZvUPe/arcgis/rest/services/Tourist_/FeatureServer/0',
+    pane: 'Tourist Pane',
+    simplifyFactor: 0,
+    precision: 10,
+    opacity: 0.6,
+    style: function (feature) {
+      if (feature.properties.Type === 'Most Suitable') {
+        return { fillColor: '#641E16', weight: 1,color: '#641E16'};
+      } else if (feature.properties.Type === 'Suitable') {
+        return { fillColor: '#CB4335', weight: 1,color: '#CB4335' };
+      } else if (feature.properties.Type === 'Somewhat Suitable') {
+        return { fillColor: '#E67E22', weight: 1,color: '#E67E22' };
+      } else if (feature.properties.Type === 'Less Suitable') {
+        return { fillColor: '#F5B041', weight: 1,color: '#F5B041' };
+      } else {
+        return { fillColor: '#F9E79F', weight: 1,color: '#F9E79F'};
+      }
+    }
+  });
+
+  Tourists.bindPopup(function (layer) {
+    return L.Util.template('<p><strong>Livability Index for Tourists</strong><br><strong>Suitability: </strong>{Type}</p>', layer.feature.properties);
+  });
+  //Boundary------------------------------------------------------------------------------------
+  var Boundary = L.esri.featureLayer({
+    url: 'https://services1.arcgis.com/DwLTn0u9VBSZvUPe/arcgis/rest/services/Boundary/FeatureServer/0',
+    pane:'Boundary Pane',
+    style: function (feature) {
+      if (feature.properties.Name === 'Town of Huntsville') {
+        return { fillColor: '#ffffff00', weight: 2, color:'#000000' };
+      }
+    }
+  });
+
+
+  //Define Map============================================================================================
+  var map = L.map('map', {
+    center: [45.310602, -79.236708],
+    zoom: 11,
+    layers: [OSM, Boundary, Residents, Tourists, TouristAttraction,FloodZone]
+  });
+
+  //Define the order of the layers=======================================================================
+  map.createPane('Boundary Pane');
+  map.createPane('Tourist Pane');
+  map.createPane('Res Pane');
+  map.createPane('Floozone Pane');
+  map.createPane('TA Pane')
+
+  //Add Layer Control=====================================================================================
+  var OSMLayer = {
+    OpenStreetMap:OSM
+  };
+
+  var GeneralFeatures = L.layerGroup([FloodZone,TouristAttraction]);
+
+  var GeneralLayer = {
+    'Flood Zones':FloodZone,
+    'Tourist Attraction Point': TouristAttraction,
+    'Livability Index for Residents':Residents,
+    'Livability Index for Tourists':Tourists};
+
+  L.control.layers(OSMLayer, GeneralLayer, {collapsed: false }).addTo(map);
+
+
+  //Add Search=============================================================================================
+  var arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
+
+  L.esri.Geocoding.geosearch({
+    providers: [
+      arcgisOnline,
+      L.esri.Geocoding.mapServiceProvider({
+        label: 'States and Counties',
+        url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer',
+        layers: [2, 3],
+        searchFields: ['NAME', 'STATE_NAME']
+      })
+    ]
+  }).addTo(map);
+
+
+
+</script>
+
+</body>
+</html>
